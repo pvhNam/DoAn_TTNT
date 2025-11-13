@@ -22,7 +22,7 @@ public class Othello extends JFrame {
 				add(board[i][j]);
 			}
 		}
-		
+		// vị trí cố dịnh khi bắt đầu
 		board[3][3].setBackground(Color.WHITE);
 		board[3][4].setBackground(Color.BLACK);
 		board[4][3].setBackground(Color.BLACK);
