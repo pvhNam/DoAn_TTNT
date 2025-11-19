@@ -15,6 +15,7 @@ public class Othello extends JFrame {
 		setTitle("Othello");
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setSize(600, 600);
+		setResizable(false);
 		
 		JPanel scorePanel = new JPanel();
         scorePanel.setLayout(new FlowLayout());
