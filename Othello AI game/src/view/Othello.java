@@ -4,6 +4,7 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.*;
+import controller.GameController; // Import Controller
 
 public class Othello extends JFrame {
     // Màu sắc giao diện
@@ -13,107 +14,83 @@ public class Othello extends JFrame {
     private static final Color PANEL_COLOR = new Color(40, 40, 40);
 
     private Cell[][] board = new Cell[8][8];
+    private JLabel turnLabel, blackScoreLabel, whiteScoreLabel;
     
-    // Các Label hiển thị thông tin
-    private JLabel turnLabel;
-    private JLabel blackScoreLabel;
-    private JLabel whiteScoreLabel;
-    
-    private int currentPlayer = 1; // 1: Đen, 2: Trắng
+    private GameController controller; // Tham chiếu Controller
+    private int currentPlayer = 1; 
 
     public Othello() {
-        setTitle("Othello Game");
+        setTitle("Othello Game - MVC");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setSize(700, 780);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        // --- 1. HEADER PANEL (Chứa Tỉ số & Lượt đi) ---
-        JPanel headerPanel = new JPanel();
-        headerPanel.setLayout(new BorderLayout());
+        // --- HEADER ---
+        JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setBackground(PANEL_COLOR);
         headerPanel.setBorder(new EmptyBorder(15, 20, 15, 20));
 
-        // Điểm Đen (Bên trái)
         blackScoreLabel = new JLabel("ĐEN: 2");
         blackScoreLabel.setForeground(Color.WHITE);
         blackScoreLabel.setFont(new Font("Arial", Font.BOLD, 16));
-        blackScoreLabel.setIcon(createIcon(Color.BLACK)); // Icon minh họa
+        blackScoreLabel.setIcon(createIcon(Color.BLACK));
         headerPanel.add(blackScoreLabel, BorderLayout.WEST);
 
-        // Thông báo lượt (Ở giữa)
         turnLabel = new JLabel("Lượt: ĐEN", SwingConstants.CENTER);
-        turnLabel.setForeground(Color.CYAN); // Màu nổi bật cho lượt đi
+        turnLabel.setForeground(Color.GREEN);
         turnLabel.setFont(new Font("Arial", Font.BOLD, 20));
         headerPanel.add(turnLabel, BorderLayout.CENTER);
 
-        // Điểm Trắng (Bên phải)
         whiteScoreLabel = new JLabel("TRẮNG: 2");
         whiteScoreLabel.setForeground(Color.WHITE);
         whiteScoreLabel.setFont(new Font("Arial", Font.BOLD, 16));
-        whiteScoreLabel.setIcon(createIcon(Color.WHITE)); // Icon minh họa
-        whiteScoreLabel.setHorizontalTextPosition(SwingConstants.LEFT); // Chữ nằm bên trái icon
+        whiteScoreLabel.setIcon(createIcon(Color.WHITE));
+        whiteScoreLabel.setHorizontalTextPosition(SwingConstants.LEFT);
         headerPanel.add(whiteScoreLabel, BorderLayout.EAST);
 
         add(headerPanel, BorderLayout.NORTH);
 
-        // --- 2. BÀN CỜ (Center) ---
-        JPanel boardPanel = new JPanel();
-        boardPanel.setLayout(new GridLayout(8, 8, 2, 2));
+        // --- BOARD ---
+        JPanel boardPanel = new JPanel(new GridLayout(8, 8, 2, 2));
         boardPanel.setBackground(GRID_COLOR);
         boardPanel.setBorder(BorderFactory.createLineBorder(GRID_COLOR, 5));
 
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 board[i][j] = new Cell(i, j);
-                board[i][j].addMouseListener(new CellClick(i, j));
                 boardPanel.add(board[i][j]);
             }
         }
         add(boardPanel, BorderLayout.CENTER);
-
-        // --- 3. Khởi tạo ban đầu ---
-        board[3][3].setPiece(2);
-        board[4][4].setPiece(2);
-        board[3][4].setPiece(1);
-        board[4][3].setPiece(1);
-
-        updateScore(); // Cập nhật điểm lần đầu
+        
+        // Khởi tạo Controller
+        controller = new GameController(this);
 
         setVisible(true);
     }
 
-    // Hàm tạo icon tròn nhỏ cho phần tỉ số
-    private Icon createIcon(Color color) {
-        return new Icon() {
-            @Override
-            public void paintIcon(Component c, Graphics g, int x, int y) {
-                g.setColor(color);
-                g.fillOval(x, y, getIconWidth(), getIconHeight());
-                if (color == Color.BLACK) {
-                    g.setColor(Color.GRAY);
-                    g.drawOval(x, y, getIconWidth(), getIconHeight());
-                }
-            }
-            @Override
-            public int getIconWidth() { return 15; }
-            @Override
-            public int getIconHeight() { return 15; }
-        };
+    // Hàm để Controller gọi cập nhật giao diện từng ô
+    public void updateBoardCell(int r, int c, int piece) {
+        board[r][c].setPiece(piece);
+        updateScore(); // Tính lại điểm mỗi khi bàn cờ thay đổi
     }
 
-    // Hàm đếm và cập nhật giao diện điểm số
+    // Hàm để Controller set lượt người chơi
+    public void setCurrentPlayer(int p) {
+        this.currentPlayer = p;
+        updateScore();
+    }
+
     private void updateScore() {
         int blackCount = 0;
         int whiteCount = 0;
-
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 if (board[i][j].piece == 1) blackCount++;
                 else if (board[i][j].piece == 2) whiteCount++;
             }
         }
-
         blackScoreLabel.setText("ĐEN: " + blackCount);
         whiteScoreLabel.setText("TRẮNG: " + whiteCount);
         
@@ -126,17 +103,42 @@ public class Othello extends JFrame {
         }
     }
 
-    // --- Class Cell (Giữ nguyên logic vẽ) ---
+    private Icon createIcon(Color color) {
+        return new Icon() {
+            @Override
+            public void paintIcon(Component c, Graphics g, int x, int y) {
+                g.setColor(color);
+                g.fillOval(x, y, 15, 15);
+                if (color == Color.BLACK) {
+                    g.setColor(Color.GRAY);
+                    g.drawOval(x, y, 15, 15);
+                }
+            }
+            @Override
+            public int getIconWidth() { return 15; }
+            @Override
+            public int getIconHeight() { return 15; }
+        };
+    }
+
+    // --- INNER CLASS CELL ---
     private class Cell extends JPanel {
         int row, col;
-        int piece = 0; // 0: Trống, 1: Đen, 2: Trắng
+        int piece = 0; 
         boolean isHovered = false;
 
         public Cell(int r, int c) {
             this.row = r;
             this.col = c;
             setBackground(BOARD_COLOR);
+            
             addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    if (controller != null) {
+                        controller.handleCellClick(row, col);
+                    }
+                }
                 @Override
                 public void mouseEntered(MouseEvent e) { isHovered = true; repaint(); }
                 @Override
@@ -165,40 +167,20 @@ public class Othello extends JFrame {
             }
 
             if (piece != 0) {
-                g2.setColor(new Color(0, 0, 0, 50)); // Shadow
-                g2.fillOval(x + 3, y + 3, size, size);
+                g2.setColor(new Color(0, 0, 0, 50));
+                g2.fillOval(x + 3, y + 3, size, size); // Shadow
 
-                if (piece == 1) { // Đen
+                if (piece == 1) { // Black
                     g2.setColor(Color.BLACK);
                     g2.fillOval(x, y, size, size);
-                    g2.setColor(new Color(60, 60, 60)); // Highlight
+                    g2.setColor(new Color(60, 60, 60));
                     g2.drawOval(x + 5, y + 5, size - 10, size - 10);
-                } else { // Trắng
+                } else { // White
                     g2.setColor(Color.WHITE);
                     g2.fillOval(x, y, size, size);
-                    g2.setColor(Color.LIGHT_GRAY); // Border
+                    g2.setColor(Color.LIGHT_GRAY);
                     g2.drawOval(x, y, size, size);
                 }
-            }
-        }
-    }
-
-    // --- Xử lý sự kiện Click ---
-    private class CellClick extends MouseAdapter {
-        int x, y;
-        CellClick(int x, int y) { this.x = x; this.y = y; }
-
-        @Override
-        public void mousePressed(MouseEvent e) {
-            if (board[x][y].piece == 0) {
-                // Đặt quân cờ
-                board[x][y].setPiece(currentPlayer);
-                
-                // Đổi lượt
-                currentPlayer = (currentPlayer == 1) ? 2 : 1;
-                
-                // CẬP NHẬT TỈ SỐ SAU MỖI NƯỚC ĐI
-                updateScore(); 
             }
         }
     }
