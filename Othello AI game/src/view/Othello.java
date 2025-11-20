@@ -25,7 +25,7 @@ public class Othello extends JFrame {
         setSize(700, 780);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
-
+        setResizable(false);
         // --- HEADER ---
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setBackground(PANEL_COLOR);
