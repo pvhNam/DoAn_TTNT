@@ -81,4 +81,22 @@ public class GameController {
         String winner = (blackScore > whiteScore) ? "ĐEN Thắng!" : (whiteScore > blackScore) ? "TRẮNG Thắng!" : "Hòa!";
         JOptionPane.showMessageDialog(view, "GAME OVER!\n" + winner);
     }
+ // --- THÊM HÀM NÀY (LOGIC RESET) ---
+    public void resetGame() {
+        // 1. Reset dữ liệu trong Model (về 4 quân ban đầu)
+        model.reset();
+        
+        // 2. Đặt lại lượt đi là Đen
+        currentPlayer = Player.BLACK;
+        
+        // 3. Cập nhật lại toàn bộ giao diện bàn cờ
+        updateViewFromModel();
+        
+        // 4. Cập nhật thông tin lượt chơi trên View
+        view.setCurrentPlayer(currentPlayer);
+        
+        // (Tùy chọn) Thông báo nhỏ
+        System.out.println("Game has been reset!");
+    }
+    // ----------------------------------
 }

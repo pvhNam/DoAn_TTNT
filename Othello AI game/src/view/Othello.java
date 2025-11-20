@@ -26,6 +26,29 @@ public class Othello extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
         setResizable(false);
+        
+     // --- 0. THÊM MENU BAR (MỚI) ---
+        JMenuBar menuBar = new JMenuBar();
+        JMenu gameMenu = new JMenu("Game");
+        
+        JMenuItem resetItem = new JMenuItem("New Game");
+        // Phím tắt Ctrl + N
+        resetItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK));
+        
+        // Bắt sự kiện khi bấm nút New Game
+        resetItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (controller != null) {
+                    controller.resetGame(); // Gọi hàm reset bên Controller
+                }
+            }
+        });
+
+        gameMenu.add(resetItem);
+        menuBar.add(gameMenu);
+        setJMenuBar(menuBar); // Gắn Menu Bar vào cửa sổ
+        // ----------------------------------
         // --- HEADER ---
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setBackground(PANEL_COLOR);
