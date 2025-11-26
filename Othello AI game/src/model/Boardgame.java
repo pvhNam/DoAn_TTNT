@@ -2,17 +2,16 @@ package model;
 
 public class Boardgame {
     private int[][] board;
-    public static final int SIZE = 8;
 
     public Boardgame() {
-        board = new int[SIZE][SIZE];
+        board = new int[8][8];
         reset();
     }
 
     public void reset() {
         // Xóa bàn cờ
-        for (int i = 0; i < SIZE; i++) {
-            for (int j = 0; j < SIZE; j++) {
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
                 board[i][j] = Player.EMPTY;
             }
         }
@@ -24,14 +23,14 @@ public class Boardgame {
     }
 
     public int getPiece(int r, int c) {
-        if (r >= 0 && r < SIZE && c >= 0 && c < SIZE) {
+        if (r >= 0 && r < 8 && c >= 0 && c < 8) {
             return board[r][c];
         }
-        return -1; // Lỗi
+        return -1;
     }
 
     public void setPiece(int r, int c, int piece) {
-        if (r >= 0 && r < SIZE && c >= 0 && c < SIZE) {
+        if (r >= 0 && r < 8 && c >= 0 && c < 8) {
             board[r][c] = piece;
         }
     }

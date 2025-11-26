@@ -3,8 +3,8 @@ package model;
 public class GameLogic {
     
     // 8 hướng (Ngang, Dọc, Chéo)
-    private static final int[] DX = {-1, -1, -1, 0, 0, 1, 1, 1};
-    private static final int[] DY = {-1, 0, 1, -1, 1, -1, 0, 1};
+    private static final int[] ROW = {-1, -1, -1, 0, 0, 1, 1, 1};
+    private static final int[] COL = {-1, 0, 1, -1, 1, -1, 0, 1};
 
     /**
      * Kiểm tra xem người chơi có thể đặt cờ vào (r, c) không
@@ -15,8 +15,8 @@ public class GameLogic {
         int opponent = Player.getOpponent(player);
 
         for (int i = 0; i < 8; i++) {
-            int x = r + DX[i];
-            int y = c + DY[i];
+            int x = r + ROW[i];
+            int y = c + COL[i];
             boolean hasOpponentBetween = false;
 
             while (isValidPos(x, y)) {
@@ -29,8 +29,8 @@ public class GameLogic {
                 } else {
                     break; // Gặp ô trống
                 }
-                x += DX[i];
-                y += DY[i];
+                x += ROW[i];
+                y += COL[i];
             }
         }
         return false;
@@ -44,8 +44,8 @@ public class GameLogic {
         int opponent = Player.getOpponent(player);
 
         for (int i = 0; i < 8; i++) {
-            int x = r + DX[i];
-            int y = c + DY[i];
+            int x = r + ROW[i];
+            int y = c + COL[i];
             boolean hasOpponentBetween = false;
             
             // Kiểm tra hướng này có lật được không
@@ -57,20 +57,20 @@ public class GameLogic {
                 } else if (p == player) {
                     if (hasOpponentBetween) {
                         // Lật ngược lại từ vị trí hiện tại về vị trí đặt
-                        int flipX = r + DX[i];
-                        int flipY = c + DY[i];
+                        int flipX = r + ROW[i];
+                        int flipY = c + COL[i];
                         while (flipX != tempX || flipY != tempY) {
                             game.setPiece(flipX, flipY, player);
-                            flipX += DX[i];
-                            flipY += DY[i];
+                            flipX += ROW[i];
+                            flipY += COL[i];
                         }
                     }
                     break;
                 } else {
                     break;
                 }
-                tempX += DX[i];
-                tempY += DY[i];
+                tempX += ROW[i];
+                tempY += COL[i];
             }
         }
     }

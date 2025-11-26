@@ -30,10 +30,6 @@ public class GameController {
             
             // 4. Đổi lượt và xử lý Logic "Pass" (Bỏ lượt)
             switchTurn();
-            
-        } else {
-            // Nếu muốn báo lỗi khi click sai
-            // JOptionPane.showMessageDialog(view, "Nước đi không hợp lệ!");
         }
     }
 
@@ -100,9 +96,9 @@ public class GameController {
     }
     // ----------------------------------
     public boolean[][] getValidMoves() {
-    	boolean[][] validMoves = new boolean[Boardgame.SIZE][Boardgame.SIZE];
-        for (int i = 0; i < Boardgame.SIZE; i++) {
-            for (int j = 0; j < Boardgame.SIZE; j++) {
+    	boolean[][] validMoves = new boolean[8][8];
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
                 // Sử dụng GameLogic để kiểm tra nước đi hợp lệ
                 validMoves[i][j] = GameLogic.isValidMove(model, i, j, currentPlayer);
             }
