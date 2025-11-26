@@ -48,10 +48,8 @@ public class GameLogic {
             int y = c + COL[i];
             boolean hasOpponentBetween = false;
             
-            // Kiểm tra hướng này có lật được không
-            int tempX = x, tempY = y;
-            while (isValidPos(tempX, tempY)) {
-                int p = game.getPiece(tempX, tempY);
+            while (isValidPos(x, y)) {
+                int p = game.getPiece(x, y);
                 if (p == opponent) {
                     hasOpponentBetween = true;
                 } else if (p == player) {
@@ -59,7 +57,7 @@ public class GameLogic {
                         // Lật ngược lại từ vị trí hiện tại về vị trí đặt
                         int flipX = r + ROW[i];
                         int flipY = c + COL[i];
-                        while (flipX != tempX || flipY != tempY) {
+                        while (flipX != x || flipY != y) {
                             game.setPiece(flipX, flipY, player);
                             flipX += ROW[i];
                             flipY += COL[i];
@@ -69,8 +67,8 @@ public class GameLogic {
                 } else {
                     break;
                 }
-                tempX += ROW[i];
-                tempY += COL[i];
+                x += ROW[i];
+                y += COL[i];
             }
         }
     }
