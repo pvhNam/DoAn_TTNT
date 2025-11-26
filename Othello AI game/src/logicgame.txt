@@ -1,0 +1,25 @@
+phân tích đề bài làm cờ lật othello
+I. Xác định đối tượng
+- Bàn cờ --> ô vuông trong bàn cờ ( bàn cờ 8x8)
+- Quân cờ --> 2 loại quân cờ trắng đen 
+- Người chơi và máy chơi
+II. Xác định các hành động 
+- Đặt cờ
+- Lật cờ 
+- Thắng thua
+- Nước đi hợp lệ 
+III. Logic game và luật 
+- Bắt đầu với 4 ô được cho giữa bàn cờ với đen và trắng đặt xen kẽ nhau 
++ ô bắt đầu với cố định quân đen vị trí {(D,4);(E,5)} 
++ Quân trắng cố định vị trí {(D,5);(E,4)}
+- Khi đánh ô bên cạnh là tường hoặc là ô trống thì hướng đi này không đi được nữa
++ Bên cạnh là quân cùng màu thì cũng không đánh được 
++ Nếu thấy quân địch ở bị chặn đầu thì đánh vào tạo ra tình huống kẹp đầu và cuối 
+- Sau khi bị kẹp thì dùng hành động lật ngay tại chỗ bị kẹp 
+- Kết thúc lượt đến lượt đối thủ
+- Trường Hợp mà không có vị trí nào có thể kẹp được quân của đối thủ 
++ Thì sẽ chuyển lượt về cho đối thủ 
++ Đối thủ không có lượt đi thì sẽ kết thúc 
++ Đếm xem ai nhiều cờ hơn sẽ thắng
+IV. Tư duy máy chơi
+- Dùng tư duy cắt tỉa
