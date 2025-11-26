@@ -99,4 +99,14 @@ public class GameController {
         System.out.println("Game has been reset!");
     }
     // ----------------------------------
+    public boolean[][] getValidMoves() {
+    	boolean[][] validMoves = new boolean[Boardgame.SIZE][Boardgame.SIZE];
+        for (int i = 0; i < Boardgame.SIZE; i++) {
+            for (int j = 0; j < Boardgame.SIZE; j++) {
+                // Sử dụng GameLogic để kiểm tra nước đi hợp lệ
+                validMoves[i][j] = GameLogic.isValidMove(model, i, j, currentPlayer);
+            }
+        }
+        return validMoves;
+    }
 }
