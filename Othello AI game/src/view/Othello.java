@@ -4,34 +4,39 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.*;
-import controller.GameController; 
+import controller.GameController; // Import Controller
 
 public class Othello extends JFrame {
-
+    // Màu sắc giao diện
     private static final Color BOARD_COLOR = new Color(39, 119, 20);
     private static final Color GRID_COLOR = new Color(20, 60, 10);
     private static final Color HINT_COLOR = new Color(255, 255, 255, 50);
     private static final Color PANEL_COLOR = new Color(40, 40, 40);
 
+    private boolean[][] validMoveHints = new boolean[8][8];
     private Cell[][] board = new Cell[8][8];
     private JLabel turnLabel, blackScoreLabel, whiteScoreLabel;
     
-    private GameController controller;
+    private GameController controller; // Tham chiếu Controller
     private int currentPlayer = 1; 
 
     public Othello() {
-        setTitle("Othello Game");
+        setTitle("Othello Game - MVC");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setSize(700, 780);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
+        refreshValidMoveHints();
         setResizable(false);
         
-     // RESET GAME
+     // --- 0. THÊM MENU BAR (MỚI) ---
         JMenuBar menuBar = new JMenuBar();
         JMenu gameMenu = new JMenu("Game");
         
         JMenuItem resetItem = new JMenuItem("New Game");
+        // Phím tắt Ctrl + N
+        resetItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK));
+        
         // Bắt sự kiện khi bấm nút New Game
         resetItem.addActionListener(new ActionListener() {
             @Override
@@ -94,12 +99,14 @@ public class Othello extends JFrame {
     public void updateBoardCell(int r, int c, int piece) {
         board[r][c].setPiece(piece);
         updateScore(); // Tính lại điểm mỗi khi bàn cờ thay đổi
+        refreshValidMoveHints();
     }
 
     // Hàm để Controller set lượt người chơi
     public void setCurrentPlayer(int p) {
         this.currentPlayer = p;
         updateScore();
+        refreshValidMoveHints();
     }
 
     private void updateScore() {
@@ -145,7 +152,6 @@ public class Othello extends JFrame {
     private class Cell extends JPanel {
         int row, col;
         int piece = 0; 
-        boolean isHovered = false;
 
         public Cell(int r, int c) {
             this.row = r;
@@ -159,10 +165,7 @@ public class Othello extends JFrame {
                         controller.handleCellClick(row, col);
                     }
                 }
-                @Override
-                public void mouseEntered(MouseEvent e) { isHovered = true; repaint(); }
-                @Override
-                public void mouseExited(MouseEvent e) { isHovered = false; repaint(); }
+              
             });
         }
 
@@ -181,8 +184,10 @@ public class Othello extends JFrame {
             int x = (getWidth() - size) / 2;
             int y = (getHeight() - size) / 2;
 
-            if (isHovered && piece == 0) {
-                g2.setColor(HINT_COLOR);
+         // Chỉ vẽ hint nếu ô đó là nước đi hợp lệ
+            if (piece == 0 && validMoveHints[row][col]) {
+                // Tùy chọn: Có thể thay đổi màu hint cho rõ ràng hơn
+                g2.setColor(HINT_COLOR); 
                 g2.fillOval(x + 5, y + 5, size - 10, size - 10);
             }
 
@@ -200,6 +205,17 @@ public class Othello extends JFrame {
                     g2.fillOval(x, y, size, size);
                     g2.setColor(Color.LIGHT_GRAY);
                     g2.drawOval(x, y, size, size);
+                }
+            }
+        }
+    }
+    private void refreshValidMoveHints() {
+        if (controller != null) {
+            this.validMoveHints = controller.getValidMoves();
+            // Yêu cầu vẽ lại toàn bộ bàn cờ để hint mới hiển thị
+            for (int i = 0; i < 8; i++) {
+                for (int j = 0; j < 8; j++) {
+                    board[i][j].repaint();
                 }
             }
         }
