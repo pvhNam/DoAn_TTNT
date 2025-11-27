@@ -9,13 +9,11 @@ public class Boardgame {
     }
 
     public void reset() {
-        // Xóa bàn cờ
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 board[i][j] = Player.EMPTY;
             }
         }
-        // Khởi tạo 4 quân giữa
         board[3][3] = Player.WHITE;
         board[4][4] = Player.WHITE;
         board[3][4] = Player.BLACK;

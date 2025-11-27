@@ -2,7 +2,6 @@ package model;
 
 public class GameLogic {
     
-    // 8 hướng (Ngang, Dọc, Chéo)
     private static final int[] ROW = {-1, -1, -1, 0, 0, 1, 1, 1};
     private static final int[] COL = {-1, 0, 1, -1, 1, -1, 0, 1};
 
@@ -24,10 +23,10 @@ public class GameLogic {
                 if (p == opponent) {
                     hasOpponentBetween = true;
                 } else if (p == player) {
-                    if (hasOpponentBetween) return true; // Tìm thấy kẹp
+                    if (hasOpponentBetween) return true;
                     else break; 
                 } else {
-                    break; // Gặp ô trống
+                    break;
                 }
                 x += ROW[i];
                 y += COL[i];
@@ -54,7 +53,6 @@ public class GameLogic {
                     hasOpponentBetween = true;
                 } else if (p == player) {
                     if (hasOpponentBetween) {
-                        // Lật ngược lại từ vị trí hiện tại về vị trí đặt
                         int flipX = r + ROW[i];
                         int flipY = c + COL[i];
                         while (flipX != x || flipY != y) {

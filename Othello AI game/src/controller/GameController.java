@@ -14,22 +14,17 @@ public class GameController {
     public GameController(Othello view) {
         this.view = view;
         this.model = new Boardgame();
-        this.currentPlayer = Player.BLACK; // Đen đi trước
+        this.currentPlayer = Player.BLACK;
         updateViewFromModel();
     }
 
     public void handleCellClick(int row, int col) {
-        // 1. Kiểm tra tính hợp lệ
         if (GameLogic.isValidMove(model, row, col, currentPlayer)) {
-            
-            // 2. Thực hiện nước đi (Logic cập nhật data)
-            GameLogic.makeMove(model, row, col, currentPlayer);
-            
-            // 3. Cập nhật View
+        	GameLogic.makeMove(model, row, col, currentPlayer);
             updateViewFromModel();
-            
-            // 4. Đổi lượt và xử lý Logic "Pass" (Bỏ lượt)
             switchTurn();
+        }else {
+        	System.out.println("không đi đc ở đây");
         }
     }
 
@@ -77,21 +72,11 @@ public class GameController {
         String winner = (blackScore > whiteScore) ? "ĐEN Thắng!" : (whiteScore > blackScore) ? "TRẮNG Thắng!" : "Hòa!";
         JOptionPane.showMessageDialog(view, "GAME OVER!\n" + winner);
     }
- // --- THÊM HÀM NÀY (LOGIC RESET) ---
     public void resetGame() {
-        // 1. Reset dữ liệu trong Model (về 4 quân ban đầu)
         model.reset();
-        
-        // 2. Đặt lại lượt đi là Đen
         currentPlayer = Player.BLACK;
-        
-        // 3. Cập nhật lại toàn bộ giao diện bàn cờ
         updateViewFromModel();
-        
-        // 4. Cập nhật thông tin lượt chơi trên View
         view.setCurrentPlayer(currentPlayer);
-        
-        // (Tùy chọn) Thông báo nhỏ
         System.out.println("Game has been reset!");
     }
     // ----------------------------------
