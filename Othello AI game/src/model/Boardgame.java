@@ -27,7 +27,6 @@ public class Boardgame {
         }
         return -1;
     }
-
     public void setPiece(int r, int c, int piece) {
         if (r >= 0 && r < size && c >= 0 && c < size) {
             board[r][c] = piece;
