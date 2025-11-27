@@ -2,15 +2,16 @@ package model;
 
 public class Boardgame {
     private int[][] board;
+    private int size = 8;
 
     public Boardgame() {
-        board = new int[8][8];
+        board = new int[size][size];
         reset();
     }
 
     public void reset() {
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
                 board[i][j] = Player.EMPTY;
             }
         }
@@ -21,14 +22,14 @@ public class Boardgame {
     }
 
     public int getPiece(int r, int c) {
-        if (r >= 0 && r < 8 && c >= 0 && c < 8) {
+        if (r >= 0 && r < size && c >= 0 && c < size) {
             return board[r][c];
         }
         return -1;
     }
 
     public void setPiece(int r, int c, int piece) {
-        if (r >= 0 && r < 8 && c >= 0 && c < 8) {
+        if (r >= 0 && r < size && c >= 0 && c < size) {
             board[r][c] = piece;
         }
     }
