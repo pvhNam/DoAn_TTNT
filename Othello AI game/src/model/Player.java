@@ -6,6 +6,10 @@ public class Player {
     public static final int WHITE = 2;
 
     public static int getOpponent(int player) {
-        return (player == BLACK) ? WHITE : BLACK;
+        if ( player == BLACK) {
+        	return WHITE;
+        }else {
+        	return BLACK;
+        } 
     }
 }

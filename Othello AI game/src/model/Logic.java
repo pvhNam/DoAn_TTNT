@@ -1,13 +1,9 @@
 package model;
 
-public class GameLogic {
-    
-    private static final int[] ROW = {-1, -1, -1, 0, 0, 1, 1, 1};
+public class Logic {
+	private static final int[] ROW = {-1, -1, -1, 0, 0, 1, 1, 1};
     private static final int[] COL = {-1, 0, 1, -1, 1, -1, 0, 1};
-
-    /**
-     * Kiểm tra xem người chơi có thể đặt cờ vào (r, c) không
-     */
+    // kiểm tra nước đi hợp lệ
     public static boolean isValidMove(Boardgame game, int r, int c, int player) {
         if (game.getPiece(r, c) != Player.EMPTY) return false;
 
@@ -34,10 +30,7 @@ public class GameLogic {
         }
         return false;
     }
-
-    /**
-     * Thực hiện nước đi và lật quân đối phương
-     */
+    // thực hiện lật quân cờ 
     public static void makeMove(Boardgame game, int r, int c, int player) {
         game.setPiece(r, c, player);
         int opponent = Player.getOpponent(player);
@@ -70,16 +63,7 @@ public class GameLogic {
             }
         }
     }
-
-    public static boolean hasAnyMove(Boardgame game, int player) {
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
-                if (isValidMove(game, i, j, player)) return true;
-            }
-        }
-        return false;
-    }
-
+    // kiểm tra vị trí đặt quân cờ
     private static boolean isValidPos(int r, int c) {
         return r >= 0 && r < 8 && c >= 0 && c < 8;
     }

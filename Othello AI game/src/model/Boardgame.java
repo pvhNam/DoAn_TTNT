@@ -33,7 +33,7 @@ public class Boardgame {
         }
     }
     
-    public int[][] getBoardArray() {
+    public int[][] getBoard() {
         return board;
     }
 }
