@@ -74,12 +74,15 @@ public class Othello extends JFrame {
 			}
 		}
 	}
-
 	// cập nhật giao diện
 	public void updateBoard(int[][] modelBoard, boolean[][] validMoves) {
+		int blackCount = 0;
+        int whiteCount = 0;
 		for (int i = 0; i < 8; i++) {
 			for (int j = 0; j < 8; j++) {
 				int piece = modelBoard[i][j];
+				if (piece == Player.BLACK) blackCount++;
+                if (piece == Player.WHITE) whiteCount++;
 				if (piece == Player.BLACK) {
 					board[i][j].setBackground(Color.BLACK);
 				} else if (piece == Player.WHITE) {
@@ -90,11 +93,12 @@ public class Othello extends JFrame {
 					} else {
 						board[i][j].setBackground(Color.green);
 					}
-					board[i][j].setEnabled(true);
 				}
 				board[i][j].repaint();
 			}
 		}
-
+		System.out.println("--------------------------");
+		System.out.println("đen: " + blackCount);
+		System.out.println("trắng: " + whiteCount);
 	}
 }

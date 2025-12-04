@@ -54,6 +54,7 @@ public class Controller {
 		int opponent = Player.getOpponent(currentPlayer);
 		if(hasValidMove(opponent)) {
             JOptionPane.showMessageDialog(view, "Không có nước đi! Đổi lượt lại cho " + (opponent == Player.BLACK ? "Đen" : "Trắng"));
+            currentPlayer = opponent;
             updateView();
 		}
 		else {
