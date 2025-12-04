@@ -84,7 +84,7 @@ public class Controller {
 		currentPlayer = Player.BLACK;
 		updateView();
 		view.setCurrentPlayer(currentPlayer);
-		System.out.println("Game has been reset!");
+		System.out.println("Game mới");
 	}
 
 	private void updateView() {
