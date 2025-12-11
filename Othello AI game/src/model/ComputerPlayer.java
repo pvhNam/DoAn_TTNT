@@ -5,164 +5,140 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ComputerPlayer {
-    private int computerSide; // Máy cầm quân Đen hay Trắng
-    private int maxDepth = 1 ; // Độ sâu tìm kiếm (càng cao càng thông minh nhưng chậm)
+    private int computerPlayer; 
+    private int maxDepth = 4; // độ sâu tìm kiếm
 
-    public ComputerPlayer(int computerSide) {
-        this.computerSide = computerSide;
+    public ComputerPlayer(int computerPlayer) {
+        this.computerPlayer = computerPlayer;
     }
-
-    // Hàm này được Controller gọi để lấy nước đi tốt nhất
+// kiểm tra nước đi tốt nhất
     public Point getBestMove(Boardgame game) {
-        int bestScore = Integer.MIN_VALUE;
-        Point bestMove = null;
+        List<Point> validMoves = getValidMoves(game, computerPlayer);
         
-        // Lấy danh sách các nước đi hợp lệ hiện tại
-        List<Point> validMoves = getValidMoves(game.getBoard(), computerSide);
+        if (validMoves.isEmpty()) return null;
 
-        // Duyệt qua từng nước đi có thể để tìm nước tốt nhất (Lớp ngoài cùng của Minimax)
+        Point bestMove = validMoves.get(0);
+        int bestValue = Integer.MIN_VALUE;
+
+        // Đây là lớp ngoài cùng, tương ứng với lượt MAX (Máy tính)
         for (Point move : validMoves) {
-            // 1. Tạo bàn cờ giả lập
-            int[][] tempBoard = cloneBoard(game.getBoard());
-            // 2. Thử đi nước này trên bàn cờ giả
-            simulateMove(tempBoard, move.x, move.y, computerSide);
+        	Boardgame nextBoard = cloneBoard(game);
+            Logic.makeMove(nextBoard, move.x, move.y, computerPlayer);
             
-            // 3. Gọi để quy Minimax để tính điểm cho nước đi này
-            // depth - 1 vì đã đi 1 nước rồi. isMaximizing = false vì lươt sau là người chơi (Min)
-            int score = minimax(tempBoard, maxDepth - 1, false, Player.getOpponent(computerSide));
-
-            // 4. Nếu điểm cao hơn điểm tốt nhất hiện tại thì cập nhật
-            if (score > bestScore) {
-                bestScore = score;
+            // Gọi để quy: False vì lượt sau là người chơi (Min)
+            int val = minimax(false, nextBoard, maxDepth - 1, Player.getOpponent(computerPlayer));
+            
+            if (val > bestValue) {
+                bestValue = val;
                 bestMove = move;
             }
         }
         return bestMove;
     }
-
-    // --- THUẬT TOÁN MINIMAX THEO ẢNH CÔ GIÁO ---
-    // maxmin trong ảnh tương ứng với biến isMaximizing ở đây
-    private int minimax(int[][] currentBoard, int depth, boolean isMaximizing, int currentTurnPlayer) {
-        // Cơ sở: Nếu hết độ sâu hoặc game kết thúc (ở đây mình đơn giản hóa là độ sâu = 0)
-        if (depth == 0) {
-            return heuristic(currentBoard);
+    // phương thức minimax
+    private int minimax(boolean maxmin, Boardgame state, int depth, int currentPlayer) {
+        // cơ sở
+        if (depth == 0 || isover(state)) {
+            return heuristic(state);
         }
 
-        List<Point> validMoves = getValidMoves(currentBoard, currentTurnPlayer);
+        List<Point> validMoves = getValidMoves(state, currentPlayer);
         
-        // Nếu không còn nước đi nào (Game over hoặc bị pass lượt) -> trả về điểm luôn
+        // Nếu không có nước đi (Pass lượt), giữ nguyên lượt cho người kia đi tiếp
         if (validMoves.isEmpty()) {
-            return heuristic(currentBoard);
+             return minimax(!maxmin, state, depth - 1, Player.getOpponent(currentPlayer));
         }
 
-        if (isMaximizing) { // Máy tính (Max)
-            int maxEval = Integer.MIN_VALUE; // Giống int temp = -99999999 trong ảnh
+        // đệ quy
+        if (maxmin == true) { // max node (Máy tính)
+        	
+            int temp = -999999999; 
             for (Point move : validMoves) {
-                // Tạo node con (bàn cờ mới)
-                int[][] nextBoard = cloneBoard(currentBoard);
-                simulateMove(nextBoard, move.x, move.y, currentTurnPlayer);
-
-                // Gọi đệ quy: đến lượt người chơi (Min)
-                int eval = minimax(nextBoard, depth - 1, false, Player.getOpponent(currentTurnPlayer));
+                Boardgame newState = cloneBoard(state); // Tạo node con
+                Logic.makeMove(newState, move.x, move.y, currentPlayer);
                 
-                // Cập nhật max
-                maxEval = Math.max(maxEval, eval);
+                int value = minimax(false, newState, depth - 1, Player.getOpponent(currentPlayer));
+                if (value > temp) {
+                    temp = value;
+                    // ghi lại node
+                }
             }
-            return maxEval;
-        } else { // Người chơi (Min)
-            int minEval = Integer.MAX_VALUE; // Giống int temp = 99999999 trong ảnh
+            return temp;
+        } else { // min node (Người chơi)
+            int temp = 999999999;
             for (Point move : validMoves) {
-                // Tạo node con
-                int[][] nextBoard = cloneBoard(currentBoard);
-                simulateMove(nextBoard, move.x, move.y, currentTurnPlayer);
-
-                // Gọi đệ quy: đến lượt máy (Max)
-                int eval = minimax(nextBoard, depth - 1, true, Player.getOpponent(currentTurnPlayer));
+                Boardgame newState = cloneBoard(state); // tạo node con
+                Logic.makeMove(newState, move.x, move.y, currentPlayer);
                 
-                // Cập nhật min
-                minEval = Math.min(minEval, eval);
+                int value = minimax(true, newState, depth - 1, Player.getOpponent(currentPlayer));
+                if (value < temp) {
+                    temp = value;
+                 // ghi lại node
+                }
             }
-            return minEval;
+            return temp;
         }
     }
 
-    // --- HÀM HEURISTIC (ĐÁNH GIÁ THẾ CỜ) ---
-    private int heuristic(int[][] board) {
-        int myScore = 0;
-        int opScore = 0;
+    // đánh giá Heuristic
+    private int heuristic(Boardgame board) {
+        int myScore = 0;// người
+        int opScore = 0;// máy 
+        int opponent = Player.getOpponent(computerPlayer);
+
+        // bảng trọng số 
+        int[][] weights = {
+            { 4, -3,  2,  2,  2,  2, -3,  4},
+            {-3, -4, -1, -1, -1, -1, -4, -3},
+            { 2, -1,  1,  0,  0,  1, -1,  2},
+            { 2, -1,  0,  1,  1,  0, -1,  2},
+            { 2, -1,  0,  1,  1,  0, -1,  2},
+            { 2, -1,  1,  0,  0,  1, -1,  2},
+            {-3, -4, -1, -1, -1, -1, -4, -3},
+            { 4, -3,  2,  2,  2,  2, -3,  4}
+        };
 
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
-                if (board[i][j] == computerSide) {
-                    myScore++;
-                    // Cộng điểm cực lớn nếu chiếm được góc (Vị trí chiến lược trong Othello)
-                    if ((i == 0 || i == 7) && (j == 0 || j == 7)) {
-                        myScore += 10; 
-                    }
-                } else if (board[i][j] == Player.getOpponent(computerSide)) {
-                    opScore++;
-                    if ((i == 0 || i == 7) && (j == 0 || j == 7)) {
-                        opScore += 10;
-                    }
+            	int piece = board.getPiece(i, j);
+            	if (piece == computerPlayer) {
+                    myScore += weights[i][j];
+                } else if (piece == opponent) {
+                    opScore += weights[i][j];
                 }
             }
         }
         return myScore - opScore;
     }
 
-    // --- CÁC HÀM PHỤ TRỢ ---
-
-    // Copy mảng 2 chiều để không ảnh hưởng bàn cờ chính
-    private int[][] cloneBoard(int[][] source) {
-        int[][] newBoard = new int[8][8];
-        for (int i = 0; i < 8; i++) {
-            System.arraycopy(source[i], 0, newBoard[i], 0, 8);
-        }
-        return newBoard;
+    //kết thúc game
+    private boolean isover(Boardgame board) {
+        // nếu cả 2 bên đều ko đi được thì là Over
+        return getValidMoves(board, Player.BLACK).isEmpty() && getValidMoves(board, Player.WHITE).isEmpty();
     }
 
-    // Tìm các nước đi hợp lệ cho một trạng thái bàn cờ bất kỳ
-    private List<Point> getValidMoves(int[][] board, int player) {
-        List<Point> moves = new ArrayList<>();
-        // Chúng ta cần một hàm kiểm tra valid move mà không phụ thuộc vào object Boardgame
-        // Tuy nhiên để tận dụng code cũ, ta sẽ dùng Logic class nhưng cần sửa đổi một chút
-        // Hoặc viết lại logic check đơn giản ở đây để giả lập:
-        
+ // hàm tạo ra một đối tượng boardgame mới giống hệt cái cũ
+    private Boardgame cloneBoard(Boardgame source) {
+        Boardgame newGame = new Boardgame(); // Tạo mới (nó sẽ tự reset về ban đầu)
+        // Copy từng ô từ source sang newGame
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
-                 // Lưu ý: Ở đây ta cần gọi hàm Logic static. 
-                 // Để đơn giản, ta cần sửa Logic.java để nhận int[][] thay vì Boardgame object
-                 // Nhưng để tránh sửa nhiều, ta tạo 1 Boardgame giả tạm thời:
-                 Boardgame tempGame = new Boardgame();
-                 setBoardRaw(tempGame, board); // Hàm hack set board, xem bên dưới
-                 if (Logic.isValidMove(tempGame, i, j, player)) {
-                     moves.add(new Point(i, j));
-                 }
+                newGame.setPiece(i, j, source.getPiece(i, j));
+            }
+        }
+        return newGame;
+    }
+    // kiểm tra nước đi hợp lệ 
+    private List<Point> getValidMoves(Boardgame game, int player) {
+        List<Point> moves = new ArrayList<>();
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                // Gọi trực tiếp Logic.isValidMove với đối tượng Boardgame
+                if (Logic.isValidMove(game, i, j, player)) {
+                    moves.add(new Point(i, j));
+                }
             }
         }
         return moves;
-    }
-    
-    // Giả lập nước đi trên bàn cờ ảo (Copy logic từ Logic.makeMove nhưng chạy trên int[][])
-    private void simulateMove(int[][] board, int r, int c, int player) {
-        // Để đơn giản hóa việc code lại logic lật cờ, ta dùng lại class Logic 
-        // bằng cách tạo Boardgame tạm
-        Boardgame tempGame = new Boardgame();
-        setBoardRaw(tempGame, board);
-        Logic.makeMove(tempGame, r, c, player);
-        
-        // Sau khi Logic xử lý xong, copy ngược lại vào board mảng
-        for(int i=0; i<8; i++) {
-            System.arraycopy(tempGame.getBoard()[i], 0, board[i], 0, 8);
-        }
-    }
-
-    // Hàm phụ để nhét mảng int[][] vào object Boardgame (cần thêm method setBoard vào Boardgame)
-    private void setBoardRaw(Boardgame game, int[][] data) {
-        for(int i=0; i<8; i++) {
-            for(int j=0; j<8; j++) {
-                game.setPiece(i, j, data[i][j]);
-            }
-        }
     }
 }

@@ -15,12 +15,12 @@ public class Othello extends JFrame {
     // UI Components
     private JLabel statusLabel;
     
-    // Thay vì 1 label chung, ta tách ra 2 label riêng cho Đen và Trắng
+    // tạo label điểm đen/ trắng
     private JLabel lblBlackScore;
     private JLabel lblWhiteScore; 
     private JPanel boardPanel;
 
-    // --- MÀU SẮC ---
+    //set màu
     private static final Color BOARD_BG = new Color(0, 100, 0); 
     private static final Color GRID_COLOR = new Color(0, 50, 0); 
     private static final Color PIECE_BLACK = Color.BLACK;
@@ -77,19 +77,19 @@ public class Othello extends JFrame {
         add(boardPanel, BorderLayout.CENTER);
     }
 
-    // --- CẬP NHẬT: Thanh trạng thái chia rõ 2 màu Đen/Trắng ---
+    // thanh trạng thái chia rõ 2 màu đen/trắng 
     private void initStatusBar() {
         JPanel statusPanel = new JPanel();
         statusPanel.setLayout(new BorderLayout());
         statusPanel.setBorder(new EmptyBorder(10, 20, 10, 20));
         statusPanel.setBackground(STATUS_BG);
 
-        // 1. Bên trái: Hiển thị lượt đi
+        // Bên trái: Hiển thị lượt đi
         statusLabel = new JLabel("Lượt: ĐEN");
         statusLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
         statusLabel.setForeground(Color.WHITE);
 
-        // 2. Bên phải: Panel chứa 2 ô điểm số
+        // Bên phải: Panel chứa 2 ô điểm số
         JPanel scoreContainer = new JPanel(new GridLayout(1, 2, 15, 0)); // Cách nhau 15px
         scoreContainer.setOpaque(false); // Trong suốt để lấy màu nền cha
 
@@ -159,7 +159,7 @@ public class Othello extends JFrame {
         boardPanel.repaint();
     }
 
-    // --- Dialog Kết thúc Game ---
+    //kết thúc game
     public void showGameOverDialog(String winner, int blackScore, int whiteScore) {
         JDialog dialog = new JDialog(this, "Kết Quả", true);
         dialog.setLayout(new BorderLayout());
@@ -207,7 +207,7 @@ public class Othello extends JFrame {
         dialog.setVisible(true);
     }
 
-    // --- BoardSquare: Vẽ 2D Phẳng ---
+    // Vẽ bảng 
     private class BoardSquare extends JPanel {
         private int row, col;
         private int piece = Player.EMPTY;
