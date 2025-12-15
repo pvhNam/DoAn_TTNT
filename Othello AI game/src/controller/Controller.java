@@ -3,7 +3,7 @@ package controller;
 import model.Boardgame;
 import model.Logic;
 import model.Player;
-import model.ComputerPlayer; // Import AI
+import model.ComputerPlayer;
 import view.Othello;
 
 import javax.swing.*;
@@ -16,23 +16,19 @@ public class Controller {
     private Othello view;
     private int currentPlayer;
     
-    // thêm AI
     private ComputerPlayer ai;
-    private boolean isVsComputer = true; // Bật chế độ chơi với máy
+    private boolean isVsComputer = true; 
 
     public Controller(Othello view) {
         this.view = view;
         this.model = new Boardgame();
         this.currentPlayer = Player.BLACK;
-        
-        // Khởi tạo AI cầm quân TRẮNG
         this.ai = new ComputerPlayer(Player.WHITE);
 
         updateView();
     }
 
     public void processMove(int r, int c) {
-        // Nếu đang là lượt máy thì chặn người dùng click
         if (isVsComputer && currentPlayer == Player.WHITE) return;
 
         if (Logic.isValidMove(model, r, c, currentPlayer)) {
@@ -40,11 +36,12 @@ public class Controller {
         } 
     }
     
-    // Tách hàm thực hiện nước đi để tái sử dụng cho cả Người và Máy
     private void executeMove(int r, int c) {
         Logic.makeMove(model, r, c, currentPlayer);
         currentPlayer = Player.getOpponent(currentPlayer);
         updateView();
+        
+        // Kiểm tra logic lượt tiếp theo
         checkNextTurn();
     }
 
@@ -58,47 +55,41 @@ public class Controller {
         }
         return false;
     }
-// kiểm tra lượt đi tiếp theo
+
     private void checkNextTurn() {
-        //Nếu người hiện tại đi được thì phải kiểm tra xem có phải máy không?
+        // 1. Nếu người hiện tại đi được
         if (hasValidMove(currentPlayer)) {
             if (isVsComputer && currentPlayer == Player.WHITE) {
-                // Dùng Timer để tạo độ trễ 1 giây trước khi máy đi
-                Timer timer = new Timer(800, new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        doComputerMove();
-                    }
-                });
-                timer.setRepeats(false); // Chỉ chạy 1 lần
+                Timer timer = new Timer(800, e -> doComputerMove());
+                timer.setRepeats(false);
                 timer.start();
             }
             return;
         }
 
-        // 2. Nếu bí nước thì chuyển lượt
+        // 2. Nếu bí nước -> Kiểm tra đối thủ
         int opponent = Player.getOpponent(currentPlayer);
         if (hasValidMove(opponent)) {
-            currentPlayer = opponent;
-            JOptionPane.showMessageDialog(view, "Không có nước đi! Đổi lượt lại cho " + (currentPlayer == Player.BLACK ? "Đen" : "Trắng"));
-            updateView();
+            // Hiển thị thông báo Hết nước đi đẹp hơn
+            String skippedPlayer = (currentPlayer == Player.BLACK) ? "ĐEN" : "TRẮNG";
+            view.showNoMoveDialog(skippedPlayer); 
             
-            // sau khi đổi lượt, nếu lại trúng lượt máy thì máy phải đi tiếp
+            currentPlayer = opponent;
+            updateView();
             checkNextTurn(); 
-            // nếu cả hai đều k có lượt thì kết thúc game
         } else {
+            // 3. Cả 2 đều bí -> Game Over
             handleGameOver();
         }
     }
     
-    // hàm thực hiện nước đi của máy
     private void doComputerMove() {
         Point bestMove = ai.getBestMove(model);
         if (bestMove != null) {
             executeMove(bestMove.x, bestMove.y);
         }
     }
-// kết thúc game
+
     private void handleGameOver() {
         int blackScore = 0;
         int whiteScore = 0;
@@ -109,15 +100,13 @@ public class Controller {
             }
         }
 
-        String result = "TỈ SỐ: ĐEN " + blackScore + " - TRẮNG " + whiteScore + "\n";
-        String winner = (blackScore > whiteScore) ? "ĐEN Thắng!" : (whiteScore > blackScore) ? "TRẮNG Thắng!" : "Hòa!";
+        String winner;
+        if (blackScore > whiteScore) winner = "ĐEN THẮNG!";
+        else if (whiteScore > blackScore) winner = "TRẮNG THẮNG!";
+        else winner = "HÒA!";
         
-        JOptionPane.showMessageDialog(view, "GAME OVER!\n" + result + winner);
-        
-        int option = JOptionPane.showConfirmDialog(view, "Chơi ván mới?", "Game Over", JOptionPane.YES_NO_OPTION);
-        if(option == JOptionPane.YES_OPTION){
-            resetGame();
-        }
+        // Gọi giao diện Game Over đẹp
+        view.showModernGameOverDialog(winner, blackScore, whiteScore);
     }
 
     public void resetGame() {
@@ -129,7 +118,6 @@ public class Controller {
 
     private void updateView() {
         boolean[][] validMoves = new boolean[8][8];
-        // nếu là lượt máy thì không hiển thị hint 
         if (!isVsComputer || currentPlayer == Player.BLACK) {
             for (int i = 0; i < 8; i++) {
                 for (int j = 0; j < 8; j++) {

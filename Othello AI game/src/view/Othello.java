@@ -12,60 +12,74 @@ public class Othello extends JFrame {
     private BoardSquare[][] boardSquares = new BoardSquare[8][8];
     private Controller controller;
     
-    // Lưu bàn cờ cũ để so sánh tìm thay đổi
     private int[][] previousBoard = new int[8][8]; 
     
-    // UI Components
     private JLabel statusLabel;
-    private JLabel lblBlackScore;
-    private JLabel lblWhiteScore; 
+    private ModernScorePanel pnlBlackScore;   
+    private ModernScorePanel pnlWhiteScore;
     private JPanel boardPanel;
 
-    // Màu sắc
-    private static final Color BOARD_BG = new Color(0, 100, 0); 
-    private static final Color GRID_COLOR = new Color(0, 50, 0); 
-    private static final Color PIECE_BLACK = Color.BLACK;
-    private static final Color PIECE_WHITE = Color.WHITE;
-    private static final Color HINT_COLOR = new Color(0, 0, 0, 80); 
-    private static final Color STATUS_BG = new Color(40, 40, 40);
-    private static final Color HIGHLIGHT_COLOR = Color.red;
+    // --- COLOR PALETTE ---
+    private static final Color APP_BG = new Color(245, 245, 245); 
+    private static final Color BOARD_COLOR = new Color(39, 110, 50); 
+    private static final Color GRID_COLOR = new Color(20, 60, 20); 
+    
+    private static final Color PIECE_BLACK = new Color(20, 20, 20); 
+    private static final Color PIECE_WHITE = new Color(240, 240, 240); 
+    
+    // Màu Highlight
+    private static final Color LAST_MOVE_BORDER = Color.RED; // Đỏ (Quân mới đánh)
+    private static final Color FLIPPED_BORDER = Color.RED;   
+    private static final Color HINT_COLOR = new Color(0, 0, 0, 60);
 
     public Othello() {
-        setTitle("Othello Classic");
+        setTitle("Othello Pro 2025");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setSize(600, 720);
+        setSize(800, 950); 
         setLayout(new BorderLayout());
+        getContentPane().setBackground(APP_BG);
 
-        // Khởi tạo bàn cờ cũ
         for(int i=0; i<8; i++) 
             for(int j=0; j<8; j++) 
                 previousBoard[i][j] = Player.EMPTY;
 
         initMenu();
-        initBoard();
-        initStatusBar();
+        initMainLayout();
 
         setLocationRelativeTo(null);
-        setResizable(false);
+        setMinimumSize(new Dimension(650, 750)); 
         setVisible(true);
     }
 
     private void initMenu() {
         JMenuBar menuBar = new JMenuBar();
-        JMenu gameMenu = new JMenu("Tùy chọn");
-        JMenuItem resetItem = new JMenuItem("Chơi Lại");
+        menuBar.setBackground(Color.WHITE);
+        
+        JMenu gameMenu = new JMenu("Tùy Chọn");
+        gameMenu.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        
+        JMenuItem resetItem = new JMenuItem("Ván Mới");
         resetItem.addActionListener(e -> {
             if (controller != null) controller.resetGame();
         });
+        
         gameMenu.add(resetItem);
         menuBar.add(gameMenu);
         setJMenuBar(menuBar);
     }
 
-    private void initBoard() {
+    private void initMainLayout() {
+        // CENTER: Bàn cờ
+        JPanel centerPanel = new JPanel(new GridBagLayout());
+        centerPanel.setBackground(APP_BG);
+        
         boardPanel = new JPanel();
         boardPanel.setLayout(new GridLayout(8, 8));
-        boardPanel.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY, 4));
+        boardPanel.setPreferredSize(new Dimension(640, 640)); 
+        boardPanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(60, 60, 60), 2), 
+            BorderFactory.createMatteBorder(5, 5, 5, 5, new Color(30, 80, 30))
+        ));
 
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
@@ -83,43 +97,32 @@ public class Othello extends JFrame {
                 boardPanel.add(boardSquares[i][j]);
             }
         }
-        add(boardPanel, BorderLayout.CENTER);
-    }
+        centerPanel.add(boardPanel);
+        add(centerPanel, BorderLayout.CENTER);
 
-    private void initStatusBar() {
-        JPanel statusPanel = new JPanel();
-        statusPanel.setLayout(new BorderLayout());
-        statusPanel.setBorder(new EmptyBorder(10, 20, 10, 20));
-        statusPanel.setBackground(STATUS_BG);
+        // SOUTH: Score Board
+        JPanel bottomPanel = new JPanel(new BorderLayout());
+        bottomPanel.setBackground(APP_BG);
+        bottomPanel.setBorder(new EmptyBorder(10, 40, 30, 40));
 
-        statusLabel = new JLabel("Lượt: ĐEN");
-        statusLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        statusLabel.setForeground(Color.WHITE);
+        statusLabel = new JLabel("SẴN SÀNG", SwingConstants.CENTER);
+        statusLabel.setFont(new Font("Segoe UI", Font.BOLD, 22));
+        statusLabel.setForeground(Color.DARK_GRAY);
+        statusLabel.setBorder(new EmptyBorder(0, 0, 15, 0));
 
-        JPanel scoreContainer = new JPanel(new GridLayout(1, 2, 15, 0)); 
+        JPanel scoreContainer = new JPanel(new GridLayout(1, 2, 40, 0)); 
         scoreContainer.setOpaque(false);
 
-        lblBlackScore = createScoreLabel("ĐEN: 2", Color.BLACK, Color.WHITE);
-        lblWhiteScore = createScoreLabel("TRẮNG: 2", Color.WHITE, Color.BLACK);
+        pnlBlackScore = new ModernScorePanel("ĐEN", PIECE_BLACK);
+        pnlWhiteScore = new ModernScorePanel("TRẮNG", PIECE_WHITE);
 
-        scoreContainer.add(lblBlackScore);
-        scoreContainer.add(lblWhiteScore);
+        scoreContainer.add(pnlBlackScore);
+        scoreContainer.add(pnlWhiteScore);
 
-        statusPanel.add(statusLabel, BorderLayout.WEST);
-        statusPanel.add(scoreContainer, BorderLayout.EAST);
+        bottomPanel.add(statusLabel, BorderLayout.NORTH);
+        bottomPanel.add(scoreContainer, BorderLayout.CENTER);
 
-        add(statusPanel, BorderLayout.SOUTH);
-    }
-    
-    private JLabel createScoreLabel(String text, Color bg, Color fg) {
-        JLabel lbl = new JLabel(text, SwingConstants.CENTER);
-        lbl.setOpaque(true);
-        lbl.setBackground(bg);
-        lbl.setForeground(fg);
-        lbl.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        lbl.setPreferredSize(new Dimension(100, 35));
-        lbl.setBorder(BorderFactory.createLineBorder(Color.GRAY));
-        return lbl;
+        add(bottomPanel, BorderLayout.SOUTH);
     }
 
     public void setController(Controller controller) {
@@ -128,17 +131,17 @@ public class Othello extends JFrame {
 
     public void setCurrentPlayer(int p) {
         if (p == Player.BLACK) {
-            statusLabel.setText("Lượt: ĐEN");
-            lblBlackScore.setBorder(BorderFactory.createLineBorder(Color.ORANGE, 2));
-            lblWhiteScore.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
+            statusLabel.setText("LƯỢT CỦA BẠN (ĐEN)");
+            pnlBlackScore.setActive(true);
+            pnlWhiteScore.setActive(false);
         } else {
-            statusLabel.setText("Lượt: TRẮNG");
-            lblWhiteScore.setBorder(BorderFactory.createLineBorder(Color.ORANGE, 2));
-            lblBlackScore.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
+            statusLabel.setText("MÁY ĐANG NGHĨ...");
+            pnlWhiteScore.setActive(true);
+            pnlBlackScore.setActive(false);
         }
     }
 
-    //  update bang
+    // UPDATE LOGIC HIỂN THỊ
     public void updateBoard(int[][] modelBoard, boolean[][] validMoves) {
         int blackCount = 0;
         int whiteCount = 0;
@@ -151,34 +154,30 @@ public class Othello extends JFrame {
                 if (newPiece == Player.BLACK) blackCount++;
                 if (newPiece == Player.WHITE) whiteCount++;
 
-                //  Phát hiện quân vừa bị lật thay đổi màu
-                boolean isFlipped = (oldPiece != Player.EMPTY) 
-                                 && (oldPiece != newPiece) 
-                                 && (newPiece != Player.EMPTY);
-
-               
+                // 1. Logic quân mới đánh (Từ Rỗng -> Có quân)
                 boolean isLastMove = (oldPiece == Player.EMPTY) && (newPiece != Player.EMPTY);
+                
+                // 2. Logic quân bị lật (Đã có quân -> Đổi màu)
+                boolean isFlipped = (oldPiece != Player.EMPTY) && (oldPiece != newPiece) && (newPiece != Player.EMPTY);
 
-                // Reset trạng thái khi bắt đầu game mới
+                // Reset trạng thái lúc bắt đầu
                 if (countPieces(modelBoard) <= 4) {
-                    isFlipped = false;
                     isLastMove = false;
+                    isFlipped = false;
                 }
 
                 boardSquares[i][j].setPiece(newPiece);
                 boardSquares[i][j].setHint(validMoves[i][j]);
                 
-                //Truyền cả 2 trạng thái xuống View con
-                boardSquares[i][j].setFlippedState(isFlipped);
-                boardSquares[i][j].setLastMoveState(isLastMove);
+                // Truyền cả 2 trạng thái
+                boardSquares[i][j].setStates(isLastMove, isFlipped);
                 
-                // Cập nhật lại mảng lưu trữ
                 previousBoard[i][j] = newPiece;
             }
         }
         
-        lblBlackScore.setText("ĐEN: " + blackCount);
-        lblWhiteScore.setText("TRẮNG: " + whiteCount);
+        pnlBlackScore.setScore(blackCount);
+        pnlWhiteScore.setScore(whiteCount);
         boardPanel.repaint();
     }
     
@@ -188,78 +187,196 @@ public class Othello extends JFrame {
         return count;
     }
 
-    public void showGameOverDialog(String winner, int blackScore, int whiteScore) {
-        JDialog dialog = new JDialog(this, "Kết Quả", true);
+    // --- DIALOG: KẾT THÚC GAME ĐẸP ---
+    public void showModernGameOverDialog(String winner, int blackScore, int whiteScore) {
+        JDialog dialog = new JDialog(this, "Kết Quả Trận Đấu", true);
+        dialog.setSize(500, 350);
         dialog.setLayout(new BorderLayout());
-        dialog.setSize(400, 220);
         dialog.setLocationRelativeTo(this);
+        dialog.setUndecorated(true); // Bỏ thanh tiêu đề mặc định
+        
+        // Panel chính có viền
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+        mainPanel.setBorder(BorderFactory.createLineBorder(new Color(34, 139, 34), 5));
+        mainPanel.setBackground(Color.WHITE);
 
-        JPanel contentPanel = new JPanel();
-        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
-        contentPanel.setBorder(new EmptyBorder(30, 20, 20, 20));
-        contentPanel.setBackground(Color.WHITE);
-
-        JLabel lblWinner = new JLabel(winner);
-        lblWinner.setFont(new Font("Segoe UI", Font.BOLD, 22));
+        // Header
+        JLabel lblHeader = new JLabel("GAME OVER", SwingConstants.CENTER);
+        lblHeader.setFont(new Font("Segoe UI", Font.BOLD, 30));
+        lblHeader.setForeground(Color.GRAY);
+        lblHeader.setAlignmentX(Component.CENTER_ALIGNMENT);
+        
+        // Winner
+        JLabel lblWinner = new JLabel(winner, SwingConstants.CENTER);
+        lblWinner.setFont(new Font("Segoe UI", Font.BOLD, 36));
+        lblWinner.setForeground(new Color(34, 139, 34)); // Xanh đậm
         lblWinner.setAlignmentX(Component.CENTER_ALIGNMENT);
-        lblWinner.setForeground(new Color(0, 100, 0));
 
-        JLabel lblScore = new JLabel("ĐEN: " + blackScore + "  -  TRẮNG: " + whiteScore);
-        lblScore.setFont(new Font("Segoe UI", Font.PLAIN, 18));
-        lblScore.setAlignmentX(Component.CENTER_ALIGNMENT);
+        // Score Box
+        JPanel scorePanel = new JPanel(new GridLayout(1, 2, 20, 0));
+        scorePanel.setBackground(Color.WHITE);
+        scorePanel.setBorder(new EmptyBorder(20, 40, 20, 40));
+        scorePanel.setMaximumSize(new Dimension(400, 100));
         
-        contentPanel.add(lblWinner);
-        contentPanel.add(Box.createRigidArea(new Dimension(0, 15)));
-        contentPanel.add(lblScore);
+        scorePanel.add(createMiniScore("ĐEN", blackScore, PIECE_BLACK));
+        scorePanel.add(createMiniScore("TRẮNG", whiteScore, Color.GRAY));
 
-        JButton btnNewGame = new JButton("CHƠI VÁN MỚI");
-        btnNewGame.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        btnNewGame.setBackground(new Color(255, 140, 0));
-        btnNewGame.setForeground(Color.WHITE);
-        btnNewGame.setFocusPainted(false);
-        btnNewGame.setBorderPainted(false);
-        btnNewGame.setPreferredSize(new Dimension(180, 45));
+        // Buttons
+        JPanel btnPanel = new JPanel();
+        btnPanel.setBackground(Color.WHITE);
+        btnPanel.setBorder(new EmptyBorder(0, 0, 30, 0));
         
-        btnNewGame.addActionListener(e -> {
-            for(int i=0; i<8; i++) 
-                for(int j=0; j<8; j++) 
-                    previousBoard[i][j] = Player.EMPTY;
-            
+        JButton btnReplay = createStyledButton("CHƠI LẠI", new Color(34, 139, 34));
+        JButton btnExit = createStyledButton("THOÁT", new Color(200, 50, 50));
+        
+        btnReplay.addActionListener(e -> {
+            // Reset logic
+            for(int i=0; i<8; i++) for(int j=0; j<8; j++) previousBoard[i][j] = Player.EMPTY;
             if (controller != null) controller.resetGame();
             dialog.dispose();
         });
+        
+        btnExit.addActionListener(e -> System.exit(0));
+        
+        btnPanel.add(btnReplay);
+        btnPanel.add(Box.createRigidArea(new Dimension(20, 0)));
+        btnPanel.add(btnExit);
 
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setBackground(Color.WHITE);
-        buttonPanel.setBorder(new EmptyBorder(0, 0, 25, 0));
-        buttonPanel.add(btnNewGame);
-
-        dialog.add(contentPanel, BorderLayout.CENTER);
-        dialog.add(buttonPanel, BorderLayout.SOUTH);
+        mainPanel.add(Box.createVerticalStrut(20));
+        mainPanel.add(lblHeader);
+        mainPanel.add(Box.createVerticalStrut(10));
+        mainPanel.add(lblWinner);
+        mainPanel.add(scorePanel);
+        mainPanel.add(Box.createVerticalGlue());
+        mainPanel.add(btnPanel);
+        
+        dialog.add(mainPanel);
         dialog.setVisible(true);
     }
+    
+    // Helper tạo nút đẹp
+    private JButton createStyledButton(String text, Color bg) {
+        JButton btn = new JButton(text);
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btn.setBackground(bg);
+        btn.setForeground(Color.WHITE);
+        btn.setFocusPainted(false);
+        btn.setPreferredSize(new Dimension(120, 40));
+        return btn;
+    }
+    
+    // Helper tạo điểm số nhỏ trong Dialog
+    private JPanel createMiniScore(String label, int score, Color color) {
+        JPanel p = new JPanel(new BorderLayout());
+        p.setBackground(new Color(240, 240, 240));
+        p.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
+        
+        JLabel l1 = new JLabel(label, SwingConstants.CENTER);
+        l1.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        l1.setForeground(color);
+        
+        JLabel l2 = new JLabel(String.valueOf(score), SwingConstants.CENTER);
+        l2.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        l2.setForeground(Color.DARK_GRAY);
+        
+        p.add(l1, BorderLayout.NORTH);
+        p.add(l2, BorderLayout.CENTER);
+        return p;
+    }
 
-    // --- BoardSquare: Vẽ ô cờ ---
+    // --- DIALOG: THÔNG BÁO HẾT NƯỚC ĐI ---
+    public void showNoMoveDialog(String playerName) {
+        JDialog d = new JDialog(this, "Thông Báo", true);
+        d.setUndecorated(true);
+        d.setSize(400, 150);
+        d.setLocationRelativeTo(this);
+        
+        JPanel p = new JPanel(new BorderLayout());
+        p.setBorder(BorderFactory.createLineBorder(Color.ORANGE, 3));
+        p.setBackground(Color.WHITE);
+        
+        JLabel l = new JLabel("<html><center>" + playerName + " không có nước đi hợp lệ!<br>Chuyển lượt cho đối thủ.</center></html>", SwingConstants.CENTER);
+        l.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        
+        JButton b = new JButton("ĐÃ HIỂU");
+        b.setBackground(Color.ORANGE);
+        b.setForeground(Color.WHITE);
+        b.addActionListener(e -> d.dispose());
+        
+        p.add(l, BorderLayout.CENTER);
+        p.add(b, BorderLayout.SOUTH);
+        
+        d.add(p);
+        d.setVisible(true);
+    }
+
+    // =========================================================================
+    // INNER CLASSES
+    // =========================================================================
+    
+    private class ModernScorePanel extends JPanel {
+        private JLabel lblName, lblScore;
+        private Color pieceColor;
+        private boolean isActive = false;
+
+        public ModernScorePanel(String name, Color pColor) {
+            this.pieceColor = pColor;
+            setLayout(new BorderLayout());
+            setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+            setBackground(Color.WHITE);
+            
+            lblName = new JLabel(name, SwingConstants.CENTER);
+            lblName.setFont(new Font("Segoe UI", Font.BOLD, 16));
+            
+            lblScore = new JLabel("2", SwingConstants.CENTER);
+            lblScore.setFont(new Font("Segoe UI", Font.BOLD, 40)); 
+
+            add(lblName, BorderLayout.NORTH);
+            add(lblScore, BorderLayout.CENTER);
+            updateStyle();
+        }
+
+        public void setScore(int score) { lblScore.setText(String.valueOf(score)); }
+        
+        public void setActive(boolean active) {
+            this.isActive = active;
+            updateStyle();
+        }
+        
+        private void updateStyle() {
+            if (isActive) {
+                setBackground(new Color(255, 250, 205)); 
+                setBorder(BorderFactory.createLineBorder(new Color(255, 165, 0), 3)); 
+            } else {
+                setBackground(Color.WHITE);
+                setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1));
+            }
+            lblName.setForeground(pieceColor == PIECE_BLACK ? Color.BLACK : Color.GRAY);
+            lblScore.setForeground(Color.GRAY);
+        }
+    }
+
     private class BoardSquare extends JPanel {
         private int row, col;
         private int piece = Player.EMPTY;
         private boolean isHint = false;
-        private boolean isFlipped = false;
-        // [MỚI] Biến theo dõi quân vừa đánh
         private boolean isLastMove = false; 
+        private boolean isFlipped = false; // Trạng thái mới: Bị lật
 
         public BoardSquare(int row, int col) {
             this.row = row;
             this.col = col;
-            this.setBackground(BOARD_BG);
-            this.setBorder(BorderFactory.createLineBorder(GRID_COLOR, 1));
         }
 
-        public void setPiece(int p) { this.piece = p; }
-        public void setHint(boolean hint) { this.isHint = hint; }
-        public void setFlippedState(boolean flipped) { this.isFlipped = flipped; }
-        // [MỚI] Setter cho last move
-        public void setLastMoveState(boolean lastMove) { this.isLastMove = lastMove; }
+        public void setPiece(int p) { this.piece = p; repaint(); }
+        public void setHint(boolean hint) { this.isHint = hint; repaint(); }
+        
+        public void setStates(boolean lastMove, boolean flipped) {
+            this.isLastMove = lastMove;
+            this.isFlipped = flipped;
+            repaint();
+        }
 
         @Override
         protected void paintComponent(Graphics g) {
@@ -269,28 +386,45 @@ public class Othello extends JFrame {
 
             int w = getWidth();
             int h = getHeight();
-            int margin = 6;
+
+            // Nền & Lưới
+            g2.setColor(BOARD_COLOR);
+            g2.fillRect(0, 0, w, h);
+            g2.setColor(GRID_COLOR);
+            g2.setStroke(new BasicStroke(1.0f));
+            g2.drawRect(0, 0, w, h); 
+
+            int margin = 8; 
+            int diameter = Math.min(w, h) - 2 * margin;
 
             if (piece != Player.EMPTY) {
                 // Vẽ quân cờ
                 g2.setColor(piece == Player.BLACK ? PIECE_BLACK : PIECE_WHITE);
-                g2.fillOval(margin, margin, w - 2 * margin, h - 2 * margin);
-                
-                // Vẽ viền cơ bản (mỏng, xám)
-                g2.setStroke(new BasicStroke(1));
-                g2.setColor(piece == Player.WHITE ? Color.LIGHT_GRAY : new Color(50,50,50));
-                g2.drawOval(margin, margin, w - 2 * margin, h - 2 * margin);
+                g2.fillOval(margin, margin, diameter, diameter);
+                // Viền mỏng
+                g2.setColor(new Color(0,0,0,50));
+                g2.setStroke(new BasicStroke(1f));
+                g2.drawOval(margin, margin, diameter, diameter);
 
-                // Nếu là quân vừa đánh (đầu) HOẶC quân vừa bị lật (cuối)
-                if (isLastMove || isFlipped) {
-                    g2.setColor(HIGHLIGHT_COLOR); 
-                    g2.setStroke(new BasicStroke(3)); 
-                    g2.drawOval(margin, margin, w - 2 * margin, h - 2 * margin);
+                // --- HIGHLIGHT 1: Quân mới đánh (Viền Đỏ Đậm) ---
+                if (isLastMove) {
+                    g2.setColor(LAST_MOVE_BORDER);
+                    g2.setStroke(new BasicStroke(3.0f)); 
+                    g2.drawOval(margin - 2, margin - 2, diameter + 4, diameter + 4);
+                }
+                
+                // --- HIGHLIGHT 2: Quân bị lật (Viền Vàng Mảnh) ---
+                // Yêu cầu của bạn: "Hiển thị các nước đã lật"
+                else if (isFlipped) {
+                    g2.setColor(FLIPPED_BORDER); // Màu vàng Gold
+                    g2.setStroke(new BasicStroke(2.0f)); 
+                    // Vẽ sát vào quân cờ
+                    g2.drawOval(margin, margin, diameter, diameter);
                 }
             } 
             else if (isHint) {
                 g2.setColor(HINT_COLOR);
-                int hintSize = w / 5;
+                int hintSize = diameter / 4; 
                 g2.fillOval((w - hintSize) / 2, (h - hintSize) / 2, hintSize, hintSize);
             }
         }
