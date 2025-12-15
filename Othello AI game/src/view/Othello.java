@@ -12,27 +12,34 @@ public class Othello extends JFrame {
     private BoardSquare[][] boardSquares = new BoardSquare[8][8];
     private Controller controller;
     
+    // Lưu bàn cờ cũ để so sánh tìm thay đổi
+    private int[][] previousBoard = new int[8][8]; 
+    
     // UI Components
     private JLabel statusLabel;
-    
-    // tạo label điểm đen/ trắng
     private JLabel lblBlackScore;
     private JLabel lblWhiteScore; 
     private JPanel boardPanel;
 
-    //set màu
+    // Màu sắc
     private static final Color BOARD_BG = new Color(0, 100, 0); 
     private static final Color GRID_COLOR = new Color(0, 50, 0); 
     private static final Color PIECE_BLACK = Color.BLACK;
     private static final Color PIECE_WHITE = Color.WHITE;
     private static final Color HINT_COLOR = new Color(0, 0, 0, 80); 
     private static final Color STATUS_BG = new Color(40, 40, 40);
+    private static final Color HIGHLIGHT_COLOR = Color.red;
 
     public Othello() {
         setTitle("Othello Classic");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setSize(600, 720);
         setLayout(new BorderLayout());
+
+        // Khởi tạo bàn cờ cũ
+        for(int i=0; i<8; i++) 
+            for(int j=0; j<8; j++) 
+                previousBoard[i][j] = Player.EMPTY;
 
         initMenu();
         initBoard();
@@ -68,7 +75,9 @@ public class Othello extends JFrame {
                 boardSquares[i][j].addMouseListener(new MouseAdapter() {
                     @Override
                     public void mousePressed(MouseEvent e) {
-                        if (controller != null) controller.processMove(r, c);
+                        if (SwingUtilities.isLeftMouseButton(e)) {
+                            if (controller != null) controller.processMove(r, c);
+                        }
                     }
                 });
                 boardPanel.add(boardSquares[i][j]);
@@ -77,39 +86,21 @@ public class Othello extends JFrame {
         add(boardPanel, BorderLayout.CENTER);
     }
 
-    // thanh trạng thái chia rõ 2 màu đen/trắng 
     private void initStatusBar() {
         JPanel statusPanel = new JPanel();
         statusPanel.setLayout(new BorderLayout());
         statusPanel.setBorder(new EmptyBorder(10, 20, 10, 20));
         statusPanel.setBackground(STATUS_BG);
 
-        // Bên trái: Hiển thị lượt đi
         statusLabel = new JLabel("Lượt: ĐEN");
         statusLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
         statusLabel.setForeground(Color.WHITE);
 
-        // Bên phải: Panel chứa 2 ô điểm số
-        JPanel scoreContainer = new JPanel(new GridLayout(1, 2, 15, 0)); // Cách nhau 15px
-        scoreContainer.setOpaque(false); // Trong suốt để lấy màu nền cha
+        JPanel scoreContainer = new JPanel(new GridLayout(1, 2, 15, 0)); 
+        scoreContainer.setOpaque(false);
 
-        // Tạo ô điểm ĐEN (Nền đen, chữ trắng)
-        lblBlackScore = new JLabel("ĐEN: 2", SwingConstants.CENTER);
-        lblBlackScore.setOpaque(true); // Để hiển thị màu nền
-        lblBlackScore.setBackground(Color.BLACK);
-        lblBlackScore.setForeground(Color.WHITE);
-        lblBlackScore.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        lblBlackScore.setPreferredSize(new Dimension(100, 35));
-        lblBlackScore.setBorder(BorderFactory.createLineBorder(Color.GRAY));
-
-        // Tạo ô điểm TRẮNG (Nền trắng, chữ đen)
-        lblWhiteScore = new JLabel("TRẮNG: 2", SwingConstants.CENTER);
-        lblWhiteScore.setOpaque(true);
-        lblWhiteScore.setBackground(Color.WHITE);
-        lblWhiteScore.setForeground(Color.BLACK);
-        lblWhiteScore.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        lblWhiteScore.setPreferredSize(new Dimension(100, 35));
-        lblWhiteScore.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+        lblBlackScore = createScoreLabel("ĐEN: 2", Color.BLACK, Color.WHITE);
+        lblWhiteScore = createScoreLabel("TRẮNG: 2", Color.WHITE, Color.BLACK);
 
         scoreContainer.add(lblBlackScore);
         scoreContainer.add(lblWhiteScore);
@@ -119,16 +110,26 @@ public class Othello extends JFrame {
 
         add(statusPanel, BorderLayout.SOUTH);
     }
+    
+    private JLabel createScoreLabel(String text, Color bg, Color fg) {
+        JLabel lbl = new JLabel(text, SwingConstants.CENTER);
+        lbl.setOpaque(true);
+        lbl.setBackground(bg);
+        lbl.setForeground(fg);
+        lbl.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        lbl.setPreferredSize(new Dimension(100, 35));
+        lbl.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+        return lbl;
+    }
 
     public void setController(Controller controller) {
         this.controller = controller;
     }
 
     public void setCurrentPlayer(int p) {
-        // Cập nhật text và làm nổi bật ô điểm của người đang chơi
         if (p == Player.BLACK) {
             statusLabel.setText("Lượt: ĐEN");
-            lblBlackScore.setBorder(BorderFactory.createLineBorder(Color.ORANGE, 2)); // Viền cam báo hiệu lượt
+            lblBlackScore.setBorder(BorderFactory.createLineBorder(Color.ORANGE, 2));
             lblWhiteScore.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
         } else {
             statusLabel.setText("Lượt: TRẮNG");
@@ -137,29 +138,56 @@ public class Othello extends JFrame {
         }
     }
 
+    //  update bang
     public void updateBoard(int[][] modelBoard, boolean[][] validMoves) {
         int blackCount = 0;
         int whiteCount = 0;
 
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
-                int piece = modelBoard[i][j];
-                if (piece == Player.BLACK) blackCount++;
-                if (piece == Player.WHITE) whiteCount++;
+                int newPiece = modelBoard[i][j];
+                int oldPiece = previousBoard[i][j];
 
-                boardSquares[i][j].setPiece(piece);
+                if (newPiece == Player.BLACK) blackCount++;
+                if (newPiece == Player.WHITE) whiteCount++;
+
+                //  Phát hiện quân vừa bị lật thay đổi màu
+                boolean isFlipped = (oldPiece != Player.EMPTY) 
+                                 && (oldPiece != newPiece) 
+                                 && (newPiece != Player.EMPTY);
+
+               
+                boolean isLastMove = (oldPiece == Player.EMPTY) && (newPiece != Player.EMPTY);
+
+                // Reset trạng thái khi bắt đầu game mới
+                if (countPieces(modelBoard) <= 4) {
+                    isFlipped = false;
+                    isLastMove = false;
+                }
+
+                boardSquares[i][j].setPiece(newPiece);
                 boardSquares[i][j].setHint(validMoves[i][j]);
+                
+                //Truyền cả 2 trạng thái xuống View con
+                boardSquares[i][j].setFlippedState(isFlipped);
+                boardSquares[i][j].setLastMoveState(isLastMove);
+                
+                // Cập nhật lại mảng lưu trữ
+                previousBoard[i][j] = newPiece;
             }
         }
         
-        // Cập nhật số điểm vào 2 ô riêng biệt
         lblBlackScore.setText("ĐEN: " + blackCount);
         lblWhiteScore.setText("TRẮNG: " + whiteCount);
-        
         boardPanel.repaint();
     }
+    
+    private int countPieces(int[][] board) {
+        int count = 0;
+        for(int[] row : board) for(int p : row) if(p != Player.EMPTY) count++;
+        return count;
+    }
 
-    //kết thúc game
     public void showGameOverDialog(String winner, int blackScore, int whiteScore) {
         JDialog dialog = new JDialog(this, "Kết Quả", true);
         dialog.setLayout(new BorderLayout());
@@ -193,7 +221,11 @@ public class Othello extends JFrame {
         btnNewGame.setPreferredSize(new Dimension(180, 45));
         
         btnNewGame.addActionListener(e -> {
-            controller.resetGame();
+            for(int i=0; i<8; i++) 
+                for(int j=0; j<8; j++) 
+                    previousBoard[i][j] = Player.EMPTY;
+            
+            if (controller != null) controller.resetGame();
             dialog.dispose();
         });
 
@@ -207,11 +239,14 @@ public class Othello extends JFrame {
         dialog.setVisible(true);
     }
 
-    // Vẽ bảng 
+    // --- BoardSquare: Vẽ ô cờ ---
     private class BoardSquare extends JPanel {
         private int row, col;
         private int piece = Player.EMPTY;
         private boolean isHint = false;
+        private boolean isFlipped = false;
+        // [MỚI] Biến theo dõi quân vừa đánh
+        private boolean isLastMove = false; 
 
         public BoardSquare(int row, int col) {
             this.row = row;
@@ -222,6 +257,9 @@ public class Othello extends JFrame {
 
         public void setPiece(int p) { this.piece = p; }
         public void setHint(boolean hint) { this.isHint = hint; }
+        public void setFlippedState(boolean flipped) { this.isFlipped = flipped; }
+        // [MỚI] Setter cho last move
+        public void setLastMoveState(boolean lastMove) { this.isLastMove = lastMove; }
 
         @Override
         protected void paintComponent(Graphics g) {
@@ -234,16 +272,21 @@ public class Othello extends JFrame {
             int margin = 6;
 
             if (piece != Player.EMPTY) {
+                // Vẽ quân cờ
                 g2.setColor(piece == Player.BLACK ? PIECE_BLACK : PIECE_WHITE);
                 g2.fillOval(margin, margin, w - 2 * margin, h - 2 * margin);
                 
+                // Vẽ viền cơ bản (mỏng, xám)
                 g2.setStroke(new BasicStroke(1));
-                if (piece == Player.WHITE) {
-                    g2.setColor(Color.LIGHT_GRAY);
-                } else {
-                    g2.setColor(new Color(50,50,50));
-                }
+                g2.setColor(piece == Player.WHITE ? Color.LIGHT_GRAY : new Color(50,50,50));
                 g2.drawOval(margin, margin, w - 2 * margin, h - 2 * margin);
+
+                // Nếu là quân vừa đánh (đầu) HOẶC quân vừa bị lật (cuối)
+                if (isLastMove || isFlipped) {
+                    g2.setColor(HIGHLIGHT_COLOR); 
+                    g2.setStroke(new BasicStroke(3)); 
+                    g2.drawOval(margin, margin, w - 2 * margin, h - 2 * margin);
+                }
             } 
             else if (isHint) {
                 g2.setColor(HINT_COLOR);

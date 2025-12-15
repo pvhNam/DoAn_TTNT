@@ -64,7 +64,7 @@ public class Controller {
         if (hasValidMove(currentPlayer)) {
             if (isVsComputer && currentPlayer == Player.WHITE) {
                 // Dùng Timer để tạo độ trễ 1 giây trước khi máy đi
-                Timer timer = new Timer(700, new ActionListener() {
+                Timer timer = new Timer(800, new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         doComputerMove();
