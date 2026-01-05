@@ -67,7 +67,7 @@ public class Controller {
             return;
         }
 
-        // Nếu bí nước -> Kiểm tra đối thủ
+        // Nếu không có nước -> Kiểm tra đối thủ
         int opponent = Player.getOpponent(currentPlayer);
         if (hasValidMove(opponent)) {
             // Hiển thị thông báo hết nước 
@@ -78,7 +78,7 @@ public class Controller {
             updateView();
             checkNextTurn(); 
         } else {
-            // Cả 2 đều bí -> Game Over
+            // Cả 2 đều không có nước đi -> kết thúc game
             handleGameOver();
         }
     }

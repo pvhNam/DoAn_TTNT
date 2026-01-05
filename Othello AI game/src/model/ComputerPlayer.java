@@ -85,9 +85,9 @@ public class ComputerPlayer {
         int discScore = heuristicDiscParity(board);
 
         // Công thức tổng hợp có trọng số
-        // Mobility rất quan trọng nên nhân hệ số cao (10)
-        // Position quan trọng vừa phải (đã có trọng số trong mảng)
-        // Disc Parity chỉ là phụ (hệ số thấp) để tránh tham ăn quân sớm
+        // Mobility rất quan trọng nên nhân hệ số cao -> mức ưu tiên 1 
+        // Position quan trọng vừa phải -> mức ưu tiên thứ 2
+        // Disc Parity chỉ là phụ để tránh tham ăn quân sớm -> mức ưu tiên 3
         
         return (10*positionalScore) + (10 * mobilityScore) + (2 * discScore);
     }

@@ -27,7 +27,7 @@ public class Othello extends JFrame {
     private static final Color PIECE_WHITE = new Color(240, 240, 240); 
     
     // Màu Highlight
-    private static final Color LAST_MOVE_BORDER = Color.RED; // Đỏ (Quân mới đánh)
+    private static final Color LAST_MOVE_BORDER = Color.RED; 
     private static final Color FLIPPED_BORDER = Color.RED;   
     private static final Color HINT_COLOR = new Color(0, 0, 0, 60);
 
@@ -140,7 +140,6 @@ public class Othello extends JFrame {
         }
     }
 
-    // UPDATE LOGIC HIỂN THỊ
     public void updateBoard(int[][] modelBoard, boolean[][] validMoves) {
         int blackCount = 0;
         int whiteCount = 0;
@@ -153,10 +152,10 @@ public class Othello extends JFrame {
                 if (newPiece == Player.BLACK) blackCount++;
                 if (newPiece == Player.WHITE) whiteCount++;
 
-                // Logic quân mới đánh (Từ Rỗng -> Có quân)
+                //quân mới đánh (Từ Rỗng -> Có quân)
                 boolean isLastMove = (oldPiece == Player.EMPTY) && (newPiece != Player.EMPTY);
                 
-                // Logic quân bị lật (Đã có quân -> Đổi màu)
+                //  quân bị lật (Đã có quân -> Đổi màu)
                 boolean isFlipped = (oldPiece != Player.EMPTY) && (oldPiece != newPiece) && (newPiece != Player.EMPTY);
 
                 // Reset trạng thái lúc bắt đầu
@@ -211,7 +210,6 @@ public class Othello extends JFrame {
         lblWinner.setForeground(new Color(34, 139, 34)); // Xanh đậm
         lblWinner.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // Score Box
         JPanel scorePanel = new JPanel(new GridLayout(1, 2, 20, 0));
         scorePanel.setBackground(Color.WHITE);
         scorePanel.setBorder(new EmptyBorder(20, 40, 20, 40));
@@ -229,7 +227,6 @@ public class Othello extends JFrame {
         JButton btnExit = createStyledButton("THOÁT", new Color(200, 50, 50));
         
         btnReplay.addActionListener(e -> {
-            // Reset logic
             for(int i=0; i<8; i++) for(int j=0; j<8; j++) previousBoard[i][j] = Player.EMPTY;
             if (controller != null) controller.resetGame();
             dialog.dispose();
@@ -253,7 +250,6 @@ public class Othello extends JFrame {
         dialog.setVisible(true);
     }
     
-    // Helper tạo nút đẹp
     private JButton createStyledButton(String text, Color bg) {
         JButton btn = new JButton(text);
         btn.setFont(new Font("Segoe UI", Font.BOLD, 14));
@@ -264,7 +260,7 @@ public class Othello extends JFrame {
         return btn;
     }
     
-    // Helper tạo điểm số nhỏ trong Dialog
+    //tạo điểm số
     private JPanel createMiniScore(String label, int score, Color color) {
         JPanel p = new JPanel(new BorderLayout());
         p.setBackground(new Color(240, 240, 240));
@@ -357,7 +353,7 @@ public class Othello extends JFrame {
         private int piece = Player.EMPTY;
         private boolean isHint = false;
         private boolean isLastMove = false; 
-        private boolean isFlipped = false; // Trạng thái mới: Bị lật
+        private boolean isFlipped = false; 
 
         public BoardSquare(int row, int col) {
             this.row = row;
@@ -401,7 +397,7 @@ public class Othello extends JFrame {
                 g2.setStroke(new BasicStroke(1f));
                 g2.drawOval(margin, margin, diameter, diameter);
 
-                // Quân mới đánh (Viền Đỏ Đậm) ---
+                // Quân mới đánh 
                 if (isLastMove) {
                     g2.setColor(LAST_MOVE_BORDER);
                     g2.setStroke(new BasicStroke(3.0f)); 
@@ -410,7 +406,7 @@ public class Othello extends JFrame {
                 
                 //Quân bị lật (Viền Vàng Mảnh)
                 else if (isFlipped) {
-                    g2.setColor(FLIPPED_BORDER); // Màu vàng Gold
+                    g2.setColor(FLIPPED_BORDER); 
                     g2.setStroke(new BasicStroke(2.0f)); 
                     // Vẽ sát vào quân cờ
                     g2.drawOval(margin, margin, diameter, diameter);
