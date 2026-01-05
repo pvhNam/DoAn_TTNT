@@ -19,7 +19,6 @@ public class Othello extends JFrame {
     private ModernScorePanel pnlWhiteScore;
     private JPanel boardPanel;
 
-    // --- COLOR PALETTE ---
     private static final Color APP_BG = new Color(245, 245, 245); 
     private static final Color BOARD_COLOR = new Color(39, 110, 50); 
     private static final Color GRID_COLOR = new Color(20, 60, 20); 
@@ -69,7 +68,7 @@ public class Othello extends JFrame {
     }
 
     private void initMainLayout() {
-        // CENTER: Bàn cờ
+        // Bàn cờ
         JPanel centerPanel = new JPanel(new GridBagLayout());
         centerPanel.setBackground(APP_BG);
         
@@ -100,7 +99,7 @@ public class Othello extends JFrame {
         centerPanel.add(boardPanel);
         add(centerPanel, BorderLayout.CENTER);
 
-        // SOUTH: Score Board
+        // Score Board
         JPanel bottomPanel = new JPanel(new BorderLayout());
         bottomPanel.setBackground(APP_BG);
         bottomPanel.setBorder(new EmptyBorder(10, 40, 30, 40));
@@ -154,10 +153,10 @@ public class Othello extends JFrame {
                 if (newPiece == Player.BLACK) blackCount++;
                 if (newPiece == Player.WHITE) whiteCount++;
 
-                // 1. Logic quân mới đánh (Từ Rỗng -> Có quân)
+                // Logic quân mới đánh (Từ Rỗng -> Có quân)
                 boolean isLastMove = (oldPiece == Player.EMPTY) && (newPiece != Player.EMPTY);
                 
-                // 2. Logic quân bị lật (Đã có quân -> Đổi màu)
+                // Logic quân bị lật (Đã có quân -> Đổi màu)
                 boolean isFlipped = (oldPiece != Player.EMPTY) && (oldPiece != newPiece) && (newPiece != Player.EMPTY);
 
                 // Reset trạng thái lúc bắt đầu
@@ -187,15 +186,14 @@ public class Othello extends JFrame {
         return count;
     }
 
-    // --- DIALOG: KẾT THÚC GAME ĐẸP ---
+    // KẾT THÚC GAME 
     public void showModernGameOverDialog(String winner, int blackScore, int whiteScore) {
         JDialog dialog = new JDialog(this, "Kết Quả Trận Đấu", true);
         dialog.setSize(500, 350);
         dialog.setLayout(new BorderLayout());
         dialog.setLocationRelativeTo(this);
-        dialog.setUndecorated(true); // Bỏ thanh tiêu đề mặc định
-        
-        // Panel chính có viền
+        dialog.setUndecorated(true);
+
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
         mainPanel.setBorder(BorderFactory.createLineBorder(new Color(34, 139, 34), 5));
@@ -285,7 +283,7 @@ public class Othello extends JFrame {
         return p;
     }
 
-    // --- DIALOG: THÔNG BÁO HẾT NƯỚC ĐI ---
+    // THÔNG BÁO HẾT NƯỚC ĐI
     public void showNoMoveDialog(String playerName) {
         JDialog d = new JDialog(this, "Thông Báo", true);
         d.setUndecorated(true);
@@ -311,10 +309,7 @@ public class Othello extends JFrame {
         d.setVisible(true);
     }
 
-    // =========================================================================
-    // INNER CLASSES
-    // =========================================================================
-    
+
     private class ModernScorePanel extends JPanel {
         private JLabel lblName, lblScore;
         private Color pieceColor;
@@ -406,15 +401,14 @@ public class Othello extends JFrame {
                 g2.setStroke(new BasicStroke(1f));
                 g2.drawOval(margin, margin, diameter, diameter);
 
-                // --- HIGHLIGHT 1: Quân mới đánh (Viền Đỏ Đậm) ---
+                // Quân mới đánh (Viền Đỏ Đậm) ---
                 if (isLastMove) {
                     g2.setColor(LAST_MOVE_BORDER);
                     g2.setStroke(new BasicStroke(3.0f)); 
                     g2.drawOval(margin - 2, margin - 2, diameter + 4, diameter + 4);
                 }
                 
-                // --- HIGHLIGHT 2: Quân bị lật (Viền Vàng Mảnh) ---
-                // Yêu cầu của bạn: "Hiển thị các nước đã lật"
+                //Quân bị lật (Viền Vàng Mảnh)
                 else if (isFlipped) {
                     g2.setColor(FLIPPED_BORDER); // Màu vàng Gold
                     g2.setStroke(new BasicStroke(2.0f)); 

@@ -57,7 +57,7 @@ public class Controller {
     }
 
     private void checkNextTurn() {
-        // 1. Nếu người hiện tại đi được
+        // Nếu người hiện tại đi được
         if (hasValidMove(currentPlayer)) {
             if (isVsComputer && currentPlayer == Player.WHITE) {
                 Timer timer = new Timer(800, e -> doComputerMove());
@@ -67,10 +67,10 @@ public class Controller {
             return;
         }
 
-        // 2. Nếu bí nước -> Kiểm tra đối thủ
+        // Nếu bí nước -> Kiểm tra đối thủ
         int opponent = Player.getOpponent(currentPlayer);
         if (hasValidMove(opponent)) {
-            // Hiển thị thông báo Hết nước đi đẹp hơn
+            // Hiển thị thông báo hết nước 
             String skippedPlayer = (currentPlayer == Player.BLACK) ? "ĐEN" : "TRẮNG";
             view.showNoMoveDialog(skippedPlayer); 
             
@@ -78,7 +78,7 @@ public class Controller {
             updateView();
             checkNextTurn(); 
         } else {
-            // 3. Cả 2 đều bí -> Game Over
+            // Cả 2 đều bí -> Game Over
             handleGameOver();
         }
     }
@@ -105,7 +105,6 @@ public class Controller {
         else if (whiteScore > blackScore) winner = "TRẮNG THẮNG!";
         else winner = "HÒA!";
         
-        // Gọi giao diện Game Over đẹp
         view.showModernGameOverDialog(winner, blackScore, whiteScore);
     }
 

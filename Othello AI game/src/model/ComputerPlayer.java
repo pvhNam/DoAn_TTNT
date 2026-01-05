@@ -6,13 +6,13 @@ import java.util.List;
 
 public class ComputerPlayer {
     private int computerPlayer; 
-    private int maxDepth = 5; // Độ sâu tìm kiếm
+    private int maxDepth = 5; 
 
     public ComputerPlayer(int computerPlayer) {
         this.computerPlayer = computerPlayer;
     }
 
-    // --- Hàm Minimax giữ nguyên ---
+    // hàm minimax
     public Point getBestMove(Boardgame game) {
         List<Point> validMoves = getValidMoves(game, computerPlayer);
         
@@ -34,10 +34,10 @@ public class ComputerPlayer {
         }
         return bestMove;
     }
-
+// minimax
     private int minimax(boolean maxmin, Boardgame state, int depth, int currentPlayer) {
         if (depth == 0 || isover(state)) {
-            return evaluateTotalScore(state); // Đổi tên hàm gọi đánh giá tổng hợp
+            return evaluateTotalScore(state);
         }
 
         List<Point> validMoves = getValidMoves(state, currentPlayer);
@@ -73,19 +73,15 @@ public class ComputerPlayer {
         }
     }
 
-    // ==========================================
-    // KHU VỰC CẬP NHẬT CÁC HEURISTIC MỚI
-    // ==========================================
-
-    // Hàm tổng hợp đánh giá (Kết hợp 3 tiêu chí)
+    // Hàm tổng hợp heuristic
     private int evaluateTotalScore(Boardgame board) {
-        // 1. Điểm vị trí (Weights)
+        // Điểm vị trí
         int positionalScore = heuristicPosition(board);
         
-        // 2. Điểm linh hoạt (Mobility)
+        // Điểm linh hoạt
         int mobilityScore = heuristicMobility(board);
         
-        // 3. Điểm chênh lệch quân (Parity)
+        // Điểm chênh lệch quân
         int discScore = heuristicDiscParity(board);
 
         // Công thức tổng hợp có trọng số
@@ -96,7 +92,7 @@ public class ComputerPlayer {
         return positionalScore + (10 * mobilityScore) + (2 * discScore);
     }
 
-    // HEURISTIC 1 (Cũ): Dựa trên bảng trọng số vị trí
+    // heuristic vị trí
     private int heuristicPosition(Boardgame board) {
         int myScore = 0;
         int opScore = 0;
@@ -126,8 +122,7 @@ public class ComputerPlayer {
         return myScore - opScore;
     }
 
-    // HEURISTIC 2 (MỚI): Mobility - Khả năng di chuyển
-    // Máy càng đi được nhiều nơi, và ép đối thủ đi ít nơi thì càng tốt
+    // heuristic khả năng di chuyển
     private int heuristicMobility(Boardgame board) {
         int opponent = Player.getOpponent(computerPlayer);
         
@@ -137,8 +132,8 @@ public class ComputerPlayer {
         return (myPossibleMoves - opPossibleMoves);
     }
 
-    // HEURISTIC 3 (MỚI): Disc Parity - Tỉ lệ quân cờ
-    // Đơn giản là lấy (Quân mình - Quân địch)
+    // heuristic chênh lêch quân cờ
+    //lấy Quân mình - Quân địch
     private int heuristicDiscParity(Boardgame board) {
         int myCount = 0;
         int opCount = 0;
@@ -154,8 +149,6 @@ public class ComputerPlayer {
         
         return (myCount - opCount);
     }
-    
-    // ==========================================
 
     private boolean isover(Boardgame board) {
         return getValidMoves(board, Player.BLACK).isEmpty() && getValidMoves(board, Player.WHITE).isEmpty();
